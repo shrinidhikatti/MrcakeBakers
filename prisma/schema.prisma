@@ -1,0 +1,148 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  phone     String?
+  image     String?
+  role      String    @default("CUSTOMER")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  orders    Order[]
+  addresses Address[]
+  reviews   Review[]
+  wishlist  Wishlist[]
+}
+
+model DeliveryPartner {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  password        String
+  phone           String
+  vehicle         String
+  totalDeliveries Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orders Order[]
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  price       Float
+  images      String
+  categoryId  String
+  inStock     Boolean  @default(true)
+  featured    Boolean  @default(false)
+  weight      String?
+  servings    String?
+  ingredients String?
+  allergens   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+  reviews    Review[]
+  wishlist   Wishlist[]
+}
+
+model Order {
+  id                  String    @id @default(cuid())
+  orderNumber         String    @unique
+  userId              String
+  addressId           String
+  subtotal            Float
+  deliveryFee         Float
+  tax                 Float     @default(0)
+  total               Float
+  status              String    @default("PENDING")
+  deliveryPartnerId   String?
+  statusHistory       String?
+  paymentId           String?
+  paymentMethod       String    @default("COD")
+  paymentStatus       String    @default("PENDING")
+  deliveryDate        DateTime
+  deliverySlot        String
+  specialInstructions String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id])
+  address         Address          @relation(fields: [addressId], references: [id])
+  items           OrderItem[]
+  deliveryPartner DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id])
+}
+
+model OrderItem {
+  id            String  @id @default(cuid())
+  orderId       String
+  productId     String
+  quantity      Int
+  price         Float
+  customization String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Address {
+  id       String  @id @default(cuid())
+  userId   String
+  fullName String
+  phone    String
+  address  String
+  city     String
+  state    String  @default("Karnataka")
+  pincode  String
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
