@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -48,21 +48,23 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String
-  price       Float
-  images      String
-  categoryId  String
-  inStock     Boolean  @default(true)
-  featured    Boolean  @default(false)
-  weight      String?
-  servings    String?
-  ingredients String?
-  allergens   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String
+  price           Float
+  images          String
+  categoryId      String
+  inStock         Boolean  @default(true)
+  quantity        Int      @default(0)
+  lowStockAlert   Int      @default(10)
+  featured        Boolean  @default(false)
+  weight          String?
+  servings        String?
+  ingredients     String?
+  allergens       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   category   Category    @relation(fields: [categoryId], references: [id])
   orderItems OrderItem[]

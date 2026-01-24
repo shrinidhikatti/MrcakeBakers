@@ -4,6 +4,7 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { Star, ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import WishlistButton from "@/components/WishlistButton";
 
 interface Product {
   id: string;
@@ -46,10 +47,13 @@ export default function ProductCard({ product }: { product: Product }) {
             {images[0]}
           </div>
           {product.featured && (
-            <div className="absolute top-3 right-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+            <div className="absolute top-3 left-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-medium">
               Featured
             </div>
           )}
+          <div className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md">
+            <WishlistButton productId={product.id} />
+          </div>
         </div>
         <div className="flex-grow space-y-2">
           <div className="flex items-center gap-1 text-yellow-500">
