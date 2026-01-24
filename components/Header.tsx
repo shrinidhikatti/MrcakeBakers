@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ShoppingCart, Heart, User, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { useCartStore } from "@/store/cartStore";
+import SearchBar from "@/components/SearchBar";
 
 interface HeaderProps {
   user?: {
@@ -16,22 +18,11 @@ interface HeaderProps {
 
 export default function Header({ user }: HeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
 
   const handleSignOut = async () => {
-    try {
-      const response = await fetch("/api/auth/signout", {
-        method: "POST",
-      });
-      if (response.ok) {
-        router.push("/login");
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+    await signOut({ callbackUrl: "/login" });
   };
 
   const navigation = [
@@ -59,7 +50,7 @@ export default function Header({ user }: HeaderProps) {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-8">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -73,6 +64,11 @@ export default function Header({ user }: HeaderProps) {
                 {item.name}
               </Link>
             ))}
+          </div>
+
+          {/* Search Bar */}
+          <div className="hidden md:block">
+            <SearchBar />
           </div>
 
           {/* Right side icons */}
@@ -104,15 +100,13 @@ export default function Header({ user }: HeaderProps) {
                     <User className="h-5 w-5" />
                     <span>{user.name}</span>
                   </Link>
-                  <form action="/api/auth/signout" method="POST">
-                    <button
-                      type="submit"
-                      className="rounded-full p-2 text-gray-700 hover:bg-gray-100 hover:text-red-600"
-                      title="Sign out"
-                    >
-                      <LogOut className="h-5 w-5" />
-                    </button>
-                  </form>
+                  <button
+                    onClick={handleSignOut}
+                    className="rounded-full p-2 text-gray-700 hover:bg-gray-100 hover:text-red-600"
+                    title="Sign out"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </button>
                 </div>
               </>
             ) : (
@@ -173,14 +167,12 @@ export default function Header({ user }: HeaderProps) {
                   >
                     Profile
                   </Link>
-                  <form action="/api/auth/signout" method="POST">
-                    <button
-                      type="submit"
-                      className="w-full text-left px-4 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50"
-                    >
-                      Sign Out
-                    </button>
-                  </form>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left px-4 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50"
+                  >
+                    Sign Out
+                  </button>
                 </>
               )}
             </div>

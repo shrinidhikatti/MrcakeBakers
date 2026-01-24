@@ -5,12 +5,25 @@ import ProductCard from "@/components/ProductCard";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default async function ProductsPage() {
+interface ProductsPageProps {
+  searchParams: Promise<{ category?: string }>;
+}
+
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const session = await auth();
+  const params = await searchParams;
+  const categorySlug = params.category;
 
   const [products, categories] = await Promise.all([
     prisma.product.findMany({
-      where: { inStock: true },
+      where: {
+        inStock: true,
+        ...(categorySlug && {
+          category: {
+            slug: categorySlug,
+          },
+        }),
+      },
       include: { category: true },
       orderBy: { createdAt: "desc" },
     }),
@@ -36,7 +49,11 @@ export default async function ProductsPage() {
           <div className="mb-8 flex flex-wrap gap-3">
             <Link
               href="/products"
-              className="px-5 py-2 rounded-full bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
+              className={`px-5 py-2 rounded-full font-medium transition-colors ${
+                !categorySlug
+                  ? "bg-primary-600 text-white"
+                  : "bg-white border-2 border-gray-200 text-gray-700 hover:border-primary-600 hover:text-primary-600"
+              }`}
             >
               All Products
             </Link>
@@ -44,7 +61,11 @@ export default async function ProductsPage() {
               <Link
                 key={category.id}
                 href={`/products?category=${category.slug}`}
-                className="px-5 py-2 rounded-full bg-white border-2 border-gray-200 text-gray-700 font-medium hover:border-primary-600 hover:text-primary-600 transition-colors"
+                className={`px-5 py-2 rounded-full font-medium transition-colors ${
+                  categorySlug === category.slug
+                    ? "bg-primary-600 text-white"
+                    : "bg-white border-2 border-gray-200 text-gray-700 hover:border-primary-600 hover:text-primary-600"
+                }`}
               >
                 {category.name}
               </Link>
@@ -60,7 +81,10 @@ export default async function ProductsPage() {
 
           {products.length === 0 && (
             <div className="text-center py-20">
-              <p className="text-xl text-gray-600">No products found.</p>
+              <p className="text-xl text-gray-600">No products found in this category.</p>
+              <Link href="/products" className="text-primary-600 hover:underline mt-2 inline-block">
+                View all products
+              </Link>
             </div>
           )}
         </div>
