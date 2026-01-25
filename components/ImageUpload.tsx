@@ -17,7 +17,7 @@ export default function ImageUpload({
   const [uploadMethod, setUploadMethod] = useState<'emoji' | 'file' | 'url'>('emoji');
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState(currentImage);
+  const [preview, setPreview] = useState(currentImage || '🍰');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,8 +74,14 @@ export default function ImageUpload({
     setPreview(emoji);
   };
 
-  const isEmoji = (str: string) => str.length <= 4 && !/^https?:\/\//.test(str) && !/^\//.test(str);
-  const isImageUrl = (str: string) => /^https?:\/\//.test(str) || /^\//.test(str);
+  const isEmoji = (str: string | undefined | null) => {
+    if (!str) return false;
+    return str.length <= 4 && !/^https?:\/\//.test(str) && !/^\//.test(str);
+  };
+  const isImageUrl = (str: string | undefined | null) => {
+    if (!str) return false;
+    return /^https?:\/\//.test(str) || /^\//.test(str);
+  };
 
   return (
     <div className="space-y-4">

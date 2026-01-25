@@ -16,7 +16,7 @@ interface Product {
   slug: string;
   description: string;
   price: number;
-  image: string;
+  images: string;
   categoryId: string;
   inStock: boolean;
   weight: string | null;
@@ -76,7 +76,7 @@ export default function EditProductPage() {
         slug: product.slug,
         description: product.description,
         price: product.price.toString(),
-        image: product.image,
+        image: product.images || '🍰',
         categoryId: product.categoryId,
         inStock: product.inStock,
         weight: product.weight || '',

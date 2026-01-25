@@ -75,6 +75,22 @@ export default function Header({ user }: HeaderProps) {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
+                {user.role === "ADMIN" && (
+                  <Link
+                    href="/admin"
+                    className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition-colors"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
+                {user.role === "DELIVERY_PARTNER" && (
+                  <Link
+                    href="/delivery"
+                    className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
+                  >
+                    Delivery Dashboard
+                  </Link>
+                )}
                 <Link
                   href="/wishlist"
                   className="relative rounded-full p-2 text-gray-700 hover:bg-gray-100 hover:text-primary-600"
@@ -160,6 +176,24 @@ export default function Header({ user }: HeaderProps) {
               ))}
               {user && (
                 <>
+                  {user.role === "ADMIN" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  {user.role === "DELIVERY_PARTNER" && (
+                    <Link
+                      href="/delivery"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100"
+                    >
+                      Delivery Dashboard
+                    </Link>
+                  )}
                   <Link
                     href="/profile"
                     onClick={() => setMobileMenuOpen(false)}

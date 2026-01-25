@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/auth';
-import prisma from '@/lib/prisma';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
 
 // GET - Fetch single product by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
+    const { id } = await params;
 
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         category: true,
       },
@@ -39,12 +39,13 @@ export async function GET(
 // PUT - Update product
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
+    const { id } = await params;
 
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -63,9 +64,12 @@ export async function PUT(
       featured,
     } = body;
 
+    // Map 'image' from request to 'images' for database
+    const images = image;
+
     // Check if product exists
     const existingProduct = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingProduct) {
@@ -87,13 +91,13 @@ export async function PUT(
     }
 
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: name || existingProduct.name,
         slug: slug || existingProduct.slug,
         description: description || existingProduct.description,
         price: price ? parseFloat(price) : existingProduct.price,
-        image: image !== undefined ? image : existingProduct.image,
+        images: images !== undefined ? images : existingProduct.images,
         categoryId: categoryId || existingProduct.categoryId,
         inStock: inStock !== undefined ? inStock : existingProduct.inStock,
         weight: weight !== undefined ? weight : existingProduct.weight,
@@ -121,18 +125,19 @@ export async function PUT(
 // DELETE - Delete product
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
+    const { id } = await params;
 
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // Check if product exists
     const existingProduct = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingProduct) {
@@ -141,7 +146,7 @@ export async function DELETE(
 
     // Check if product is used in any orders
     const ordersWithProduct = await prisma.orderItem.findFirst({
-      where: { productId: params.id },
+      where: { productId: id },
     });
 
     if (ordersWithProduct) {
@@ -155,7 +160,7 @@ export async function DELETE(
     }
 
     await prisma.product.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Product deleted successfully' });
