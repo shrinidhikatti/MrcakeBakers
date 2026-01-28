@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCartStore } from "@/store/cartStore";
@@ -10,6 +11,7 @@ import { Calendar, Clock, MapPin, Loader2 } from "lucide-react";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const { items, getTotal, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -73,7 +75,7 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+        <Header user={session?.user} />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-bold text-bakery-chocolate">Your cart is empty</h2>
@@ -95,7 +97,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bakery-cream">
-      <Header />
+      <Header user={session?.user} />
 
       <main className="flex-grow py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

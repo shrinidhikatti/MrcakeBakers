@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CheckCircle, Package, ArrowRight } from "lucide-react";
@@ -9,6 +10,7 @@ import { CheckCircle, Package, ArrowRight } from "lucide-react";
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export default function OrderSuccessPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bakery-cream">
-      <Header />
+      <Header user={session?.user} />
 
       <main className="flex-grow flex items-center justify-center py-20">
         <div className="max-w-2xl mx-auto px-4 text-center space-y-8 animate-fadeIn">

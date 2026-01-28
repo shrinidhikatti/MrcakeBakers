@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useCartStore } from "@/store/cartStore";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,6 +9,7 @@ import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
 export default function CartPage() {
+  const { data: session } = useSession();
   const { items, updateQuantity, removeItem, getTotal } = useCartStore();
   const total = getTotal();
   const deliveryFee = total > 500 ? 0 : 50;
@@ -16,7 +18,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+        <Header user={session?.user} />
 
         <main className="flex-grow flex items-center justify-center py-20">
           <div className="text-center space-y-6">
@@ -40,7 +42,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bakery-cream">
-      <Header />
+      <Header user={session?.user} />
 
       <main className="flex-grow py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

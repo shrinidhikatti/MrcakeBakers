@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatPrice } from "@/lib/utils";
 import { Package, Calendar } from "lucide-react";
 
 export default function ProfileOrdersPage() {
+  const { data: session } = useSession();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +42,7 @@ export default function ProfileOrdersPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-bakery-cream">
-      <Header />
+      <Header user={session?.user} />
 
       <main className="flex-grow py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
