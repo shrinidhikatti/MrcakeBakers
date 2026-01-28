@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HeroCarousel from "@/components/HeroCarousel";
 import { Cake, Clock, ShieldCheck, Truck, ChevronRight, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
@@ -71,15 +72,7 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="relative h-[400px] md:h-[500px] animate-fadeIn">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-400 to-pink-400 rounded-3xl transform rotate-3 opacity-20"></div>
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-500 to-pink-500 rounded-3xl transform -rotate-3 opacity-20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-80 h-80 md:w-96 md:h-96 bg-white rounded-full shadow-2xl flex items-center justify-center text-9xl">
-                    🎂
-                  </div>
-                </div>
-              </div>
+              <HeroCarousel />
             </div>
           </div>
         </section>
@@ -176,12 +169,15 @@ export default async function HomePage() {
         )}
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-primary-600 to-pink-600 text-white">
+        <section
+          className="py-20 text-white bg-cover bg-center"
+          style={{ backgroundImage: "url('/b3.png')" }}
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
             <h2 className="text-4xl md:text-5xl font-bold">
               Ready to Satisfy Your Sweet Tooth?
             </h2>
-            <p className="text-xl text-primary-100 max-w-2xl mx-auto">
+            <p className="text-xl text-white/90 max-w-2xl mx-auto">
               Order now and get your favorite treats delivered fresh to your door. Same-day delivery available!
             </p>
             <div className="flex flex-wrap justify-center gap-4">

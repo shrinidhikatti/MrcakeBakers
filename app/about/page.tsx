@@ -11,10 +11,13 @@ export default async function AboutPage() {
       <Header user={session?.user} />
 
       <main className="flex-grow">
-        <div className="bg-gradient-to-r from-primary-600 to-pink-600 text-white py-16">
+        <div
+          className="text-white py-16 bg-cover bg-center"
+          style={{ backgroundImage: "url('/b4.png')" }}
+        >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">About Mr.Cake</h1>
-            <p className="text-xl text-primary-100">
+            <p className="text-xl text-white/90">
               Baking happiness since 2020
             </p>
           </div>

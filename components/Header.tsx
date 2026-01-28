@@ -67,18 +67,18 @@ export default function Header({ user }: HeaderProps) {
           </div>
 
           {/* Search Bar */}
-          <div className="hidden md:block">
+          <div className="hidden md:block ml-8">
             <SearchBar />
           </div>
 
           {/* Right side icons */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 ml-6">
             {user ? (
               <>
                 {user.role === "ADMIN" && (
                   <Link
                     href="/admin"
-                    className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition-colors"
+                    className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
                   >
                     Admin Dashboard
                   </Link>
@@ -86,7 +86,7 @@ export default function Header({ user }: HeaderProps) {
                 {user.role === "DELIVERY_PARTNER" && (
                   <Link
                     href="/delivery"
-                    className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors"
+                    className="hidden md:inline-flex items-center px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
                   >
                     Delivery Dashboard
                   </Link>
@@ -180,7 +180,7 @@ export default function Header({ user }: HeaderProps) {
                     <Link
                       href="/admin"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100"
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100"
                     >
                       Admin Dashboard
                     </Link>
@@ -189,7 +189,7 @@ export default function Header({ user }: HeaderProps) {
                     <Link
                       href="/delivery"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-green-600 bg-green-50 hover:bg-green-100"
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100"
                     >
                       Delivery Dashboard
                     </Link>
