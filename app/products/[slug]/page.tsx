@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatPrice } from "@/lib/utils";
@@ -27,6 +28,7 @@ interface Product {
 
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [product, setProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+        <Header user={session?.user} />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto"></div>
@@ -91,7 +93,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+        <Header user={session?.user} />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center space-y-4">
             <h2 className="text-2xl font-bold text-bakery-chocolate">Product Not Found</h2>
@@ -109,7 +111,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="min-h-screen flex flex-col bg-bakery-cream">
-      <Header />
+      <Header user={session?.user} />
 
       <main className="flex-grow py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

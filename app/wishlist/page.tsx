@@ -71,8 +71,20 @@ export default function WishlistPage() {
     }
   };
 
-  const isEmoji = (str: string) =>
-    str.length <= 4 && !/^https?:\/\//.test(str) && !/^\//.test(str);
+  const isEmoji = (str: string | undefined | null) => {
+    if (!str) return false;
+    return str.length <= 4 && !/^https?:\/\//.test(str) && !/^\//.test(str);
+  };
+
+  const getProductImage = (product: WishlistItem['product']) => {
+    const images = (product as any).images || product.image || '🍰';
+    try {
+      const parsed = JSON.parse(images);
+      return parsed[0] || '🍰';
+    } catch {
+      return images || '🍰';
+    }
+  };
 
   if (loading) {
     return (
@@ -121,11 +133,11 @@ export default function WishlistPage() {
                 >
                   <Link href={`/products/${item.product.slug}`}>
                     <div className="aspect-square bg-cream-100 flex items-center justify-center">
-                      {isEmoji(item.product.image) ? (
-                        <span className="text-8xl">{item.product.image}</span>
+                      {isEmoji(getProductImage(item.product)) ? (
+                        <span className="text-8xl">{getProductImage(item.product)}</span>
                       ) : (
                         <Image
-                          src={item.product.image}
+                          src={getProductImage(item.product)}
                           alt={item.product.name}
                           width={300}
                           height={300}
