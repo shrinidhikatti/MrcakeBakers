@@ -30,7 +30,7 @@ export function rateLimit(config: RateLimitConfig) {
 
   return async (request: NextRequest): Promise<NextResponse | null> => {
     // Get identifier (IP address or user ID)
-    const identifier = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const identifier = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const key = `${identifier}:${request.nextUrl.pathname}`;
 
     const now = Date.now();

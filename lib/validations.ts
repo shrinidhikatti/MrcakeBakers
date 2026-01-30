@@ -88,5 +88,5 @@ export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): { succes
 
 // Format Zod errors for API responses
 export function formatZodErrors(errors: z.ZodError): string[] {
-  return errors.errors.map((err) => `${err.path.join('.')}: ${err.message}`);
+  return errors.issues.map((err) => `${err.path.join('.')}: ${err.message}`);
 }
