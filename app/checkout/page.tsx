@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCartStore } from "@/store/cartStore";
@@ -263,11 +264,23 @@ export default function CheckoutPage() {
 
                   {/* Items */}
                   <div className="space-y-3">
-                    {items.map((item) => (
-                      <div key={item.id} className="flex gap-3">
-                        <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
-                          {item.image}
-                        </div>
+                    {items.map((item) => {
+                      const isUrl = item.image?.startsWith('http');
+                      return (
+                        <div key={item.id} className="flex gap-3">
+                          <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg overflow-hidden flex items-center justify-center text-2xl flex-shrink-0 relative">
+                            {isUrl ? (
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                fill
+                                className="object-cover"
+                                sizes="64px"
+                              />
+                            ) : (
+                              <span>{item.image}</span>
+                            )}
+                          </div>
                         <div className="flex-grow">
                           <p className="font-semibold text-sm text-bakery-chocolate">{item.name}</p>
                           <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
@@ -276,7 +289,8 @@ export default function CheckoutPage() {
                           {formatPrice(item.price * item.quantity)}
                         </p>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   <div className="border-t border-gray-200 pt-4 space-y-3">

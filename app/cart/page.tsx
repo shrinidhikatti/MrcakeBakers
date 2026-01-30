@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useCartStore } from "@/store/cartStore";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import Link from "next/link";
@@ -51,12 +52,24 @@ export default function CartPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {items.map((item) => (
-                <div key={item.id} className="card flex gap-4">
-                  {/* Image */}
-                  <div className="w-24 h-24 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg flex items-center justify-center flex-shrink-0 text-4xl">
-                    {item.image}
-                  </div>
+              {items.map((item) => {
+                const isUrl = item.image?.startsWith('http');
+                return (
+                  <div key={item.id} className="card flex gap-4">
+                    {/* Image */}
+                    <div className="w-24 h-24 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 text-4xl relative">
+                      {isUrl ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                          sizes="96px"
+                        />
+                      ) : (
+                        <span>{item.image}</span>
+                      )}
+                    </div>
 
                   {/* Details */}
                   <div className="flex-grow">
@@ -101,7 +114,8 @@ export default function CartPage() {
                     </p>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
 
             {/* Order Summary */}

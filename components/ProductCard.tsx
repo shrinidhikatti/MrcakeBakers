@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { Star, ShoppingCart } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
@@ -22,6 +23,8 @@ interface Product {
 export default function ProductCard({ product }: { product: Product }) {
   const addItem = useCartStore((state) => state.addItem);
   const images = JSON.parse(product.images);
+  const firstImage = images[0];
+  const isUrl = firstImage?.startsWith('http');
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,9 +46,19 @@ export default function ProductCard({ product }: { product: Product }) {
     <Link href={`/products/${product.slug}`} className="group">
       <div className="card h-full flex flex-col">
         <div className="relative aspect-square overflow-hidden rounded-lg mb-4 bg-gradient-to-br from-primary-50 to-pink-50">
-          <div className="w-full h-full flex items-center justify-center text-6xl">
-            {images[0]}
-          </div>
+          {isUrl ? (
+            <Image
+              src={firstImage}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-6xl">
+              {firstImage}
+            </div>
+          )}
           {product.featured && (
             <div className="absolute top-3 left-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-medium">
               Featured

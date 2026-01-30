@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatPrice } from "@/lib/utils";
@@ -108,6 +109,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   }
 
   const images = JSON.parse(product.images);
+  const firstImage = images[0];
+  const isUrl = firstImage?.startsWith('http');
 
   return (
     <div className="min-h-screen flex flex-col bg-bakery-cream">
@@ -127,19 +130,47 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div className="grid md:grid-cols-2 gap-12">
             {/* Product Image */}
             <div className="space-y-4">
-              <div className="aspect-square bg-gradient-to-br from-primary-50 to-pink-50 rounded-2xl flex items-center justify-center text-9xl shadow-lg">
-                {images[0]}
+              <div className="aspect-square bg-gradient-to-br from-primary-50 to-pink-50 rounded-2xl overflow-hidden shadow-lg relative">
+                {isUrl ? (
+                  <Image
+                    src={firstImage}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-9xl">
+                    {firstImage}
+                  </div>
+                )}
               </div>
               {images.length > 1 && (
                 <div className="grid grid-cols-4 gap-3">
-                  {images.map((emoji: string, index: number) => (
-                    <div
-                      key={index}
-                      className="aspect-square bg-white rounded-lg flex items-center justify-center text-4xl border-2 border-gray-200 hover:border-primary-500 cursor-pointer transition-colors"
-                    >
-                      {emoji}
-                    </div>
-                  ))}
+                  {images.map((img: string, index: number) => {
+                    const isImgUrl = img?.startsWith('http');
+                    return (
+                      <div
+                        key={index}
+                        className="aspect-square bg-white rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 cursor-pointer transition-colors relative"
+                      >
+                        {isImgUrl ? (
+                          <Image
+                            src={img}
+                            alt={`${product.name} ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="100px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-4xl">
+                            {img}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

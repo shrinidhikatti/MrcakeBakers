@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 
@@ -57,19 +58,33 @@ export default async function MenuPage() {
                     {category.products.length > 0 ? (
                       category.products.map((product) => {
                         const images = product.images;
-                        let emoji = '🍰';
+                        let firstImage = '🍰';
                         try {
                           const parsed = JSON.parse(images);
-                          emoji = parsed[0] || '🍰';
+                          firstImage = parsed[0] || '🍰';
                         } catch {
-                          emoji = images || '🍰';
+                          firstImage = images || '🍰';
                         }
+
+                        const isUrl = firstImage?.startsWith('http');
 
                         return (
                           <tr key={product.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-4">
-                                <span className="text-3xl">{emoji}</span>
+                                {isUrl ? (
+                                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-primary-50 to-pink-50 flex-shrink-0 relative">
+                                    <Image
+                                      src={firstImage}
+                                      alt={product.name}
+                                      fill
+                                      className="object-cover"
+                                      sizes="64px"
+                                    />
+                                  </div>
+                                ) : (
+                                  <span className="text-3xl">{firstImage}</span>
+                                )}
                                 <div>
                                   <Link
                                     href={`/products/${product.slug}`}
