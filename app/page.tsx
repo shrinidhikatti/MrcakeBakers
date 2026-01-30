@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -115,6 +116,8 @@ export default async function HomePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {featuredProducts.map((product) => {
                   const images = JSON.parse(product.images);
+                  const firstImage = images[0];
+                  const isUrl = firstImage?.startsWith('http');
                   return (
                     <Link
                       key={product.id}
@@ -122,11 +125,21 @@ export default async function HomePage() {
                       className="group"
                     >
                       <div className="card overflow-hidden">
-                        <div className="relative aspect-square overflow-hidden rounded-lg mb-4 bg-gray-100">
-                          {images[0] && (
-                            <div className="w-full h-full flex items-center justify-center text-6xl">
-                              {images[0]}
-                            </div>
+                        <div className="relative aspect-square overflow-hidden rounded-lg mb-4 bg-gradient-to-br from-primary-50 to-pink-50">
+                          {firstImage && (
+                            isUrl ? (
+                              <Image
+                                src={firstImage}
+                                alt={product.name}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-6xl">
+                                {firstImage}
+                              </div>
+                            )
                           )}
                           <div className="absolute top-3 right-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-medium">
                             Featured
