@@ -11,6 +11,7 @@ import {
   Settings,
   Store,
   LogOut,
+  X,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -21,7 +22,7 @@ const NAV_ITEMS = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
 
   const isActive = (href: string, exact?: boolean) => {
@@ -29,10 +30,10 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-900 text-white flex flex-col flex-shrink-0">
-      {/* Logo */}
-      <div className="p-6 border-b border-slate-700">
-        <Link href="/admin" className="flex items-center gap-3">
+    <aside className="w-64 h-full bg-slate-900 text-white flex flex-col">
+      {/* Logo + mobile close button */}
+      <div className="p-6 border-b border-slate-700 flex items-center justify-between">
+        <Link href="/admin" onClick={onClose} className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 text-white font-bold text-lg">
             MC
           </div>
@@ -43,6 +44,12 @@ export default function AdminSidebar() {
             <p className="text-xs text-slate-400">Admin Panel</p>
           </div>
         </Link>
+        <button
+          onClick={onClose}
+          className="lg:hidden text-slate-400 hover:text-white p-1 rounded"
+        >
+          <X className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -53,6 +60,7 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                 active
                   ? "bg-primary-600 text-white"
@@ -70,6 +78,7 @@ export default function AdminSidebar() {
       <div className="border-t border-slate-700 p-3 space-y-1">
         <Link
           href="/"
+          onClick={onClose}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
         >
           <Store className="h-5 w-5" />
