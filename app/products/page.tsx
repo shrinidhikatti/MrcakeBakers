@@ -4,6 +4,30 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
+
+const getProductsAndCategories = unstable_cache(
+  async (categorySlug?: string) => {
+    const [products, categories] = await Promise.all([
+      prisma.product.findMany({
+        where: {
+          inStock: true,
+          ...(categorySlug && {
+            category: {
+              slug: categorySlug,
+            },
+          }),
+        },
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.category.findMany(),
+    ]);
+    return { products, categories };
+  },
+  ["products-page"],
+  { revalidate: 60 }
+);
 
 interface ProductsPageProps {
   searchParams: Promise<{ category?: string }>;
@@ -14,21 +38,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const params = await searchParams;
   const categorySlug = params.category;
 
-  const [products, categories] = await Promise.all([
-    prisma.product.findMany({
-      where: {
-        inStock: true,
-        ...(categorySlug && {
-          category: {
-            slug: categorySlug,
-          },
-        }),
-      },
-      include: { category: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.category.findMany(),
-  ]);
+  const { products, categories } = await getProductsAndCategories(categorySlug);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -77,8 +87,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
           {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.map((product, index) => (
+              <ProductCard key={product.id} product={product} priority={index < 4} />
             ))}
           </div>
 

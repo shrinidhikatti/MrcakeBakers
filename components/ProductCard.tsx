@@ -20,7 +20,7 @@ interface Product {
   };
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
   const addItem = useCartStore((state) => state.addItem);
   const images = JSON.parse(product.images);
   const firstImage = images[0];
@@ -53,6 +53,7 @@ export default function ProductCard({ product }: { product: Product }) {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={priority}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-6xl">

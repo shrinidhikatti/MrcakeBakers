@@ -7,16 +7,24 @@ import HeroCarousel from "@/components/HeroCarousel";
 import { Cake, Clock, ShieldCheck, Truck, ChevronRight, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
+import { unstable_cache } from "next/cache";
+
+const getFeaturedProducts = unstable_cache(
+  async () => {
+    return prisma.product.findMany({
+      where: { featured: true, inStock: true },
+      take: 4,
+      include: { category: true },
+    });
+  },
+  ["featured-products"],
+  { revalidate: 60 }
+);
 
 export default async function HomePage() {
   const session = await auth();
 
-  // Get featured products
-  const featuredProducts = await prisma.product.findMany({
-    where: { featured: true, inStock: true },
-    take: 4,
-    include: { category: true },
-  });
+  const featuredProducts = await getFeaturedProducts();
 
   const features = [
     {
@@ -114,7 +122,7 @@ export default async function HomePage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {featuredProducts.map((product) => {
+                {featuredProducts.map((product, index) => {
                   const images = JSON.parse(product.images);
                   const firstImage = images[0];
                   const isUrl = firstImage?.startsWith('http');
@@ -134,6 +142,7 @@ export default async function HomePage() {
                                 fill
                                 className="object-cover"
                                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                priority={index < 2}
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-6xl">

@@ -34,6 +34,7 @@ export default function HeroCarousel() {
                 alt={`Cake ${index + 1}`}
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 320px, 384px"
                 priority={index === 0}
               />
             </div>
