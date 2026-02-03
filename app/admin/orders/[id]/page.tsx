@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { ArrowLeft, Package, User, MapPin, Clock, Truck } from "lucide-react";
+import dynamic from "next/dynamic";
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 const ORDER_STATUSES = [
   "PENDING",
@@ -185,10 +188,17 @@ export default function OrderDetailPage() {
                 Order Items
               </h2>
               <div className="space-y-4">
-                {order.items.map((item: any) => (
+                {order.items.map((item: any) => {
+                  const img = JSON.parse(item.product.images)[0];
+                  const isUrl = img?.startsWith("http");
+                  return (
                   <div key={item.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
-                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-3xl">
-                      {JSON.parse(item.product.images)[0]}
+                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-3xl relative overflow-hidden">
+                      {isUrl ? (
+                        <Image src={img} alt={item.product.name} fill className="object-cover" sizes="64px" />
+                      ) : (
+                        <span>{img}</span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium">{item.product.name}</h3>
@@ -200,7 +210,8 @@ export default function OrderDetailPage() {
                       <p className="font-semibold">{formatPrice(item.price * item.quantity)}</p>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
 
@@ -275,6 +286,42 @@ export default function OrderDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Delivery Map */}
+            {(order.address?.customerLat != null || order.agentLat != null) && (
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-slate-500" />
+                  Delivery Map
+                </h2>
+                <MapView
+                  customerLocation={
+                    order.address?.customerLat != null && order.address?.customerLng != null
+                      ? { lat: order.address.customerLat, lng: order.address.customerLng }
+                      : null
+                  }
+                  agentLocation={
+                    order.agentLat != null && order.agentLng != null
+                      ? { lat: order.agentLat, lng: order.agentLng }
+                      : null
+                  }
+                  showDirections={order.agentLat != null && order.address?.customerLat != null}
+                  height="250px"
+                />
+                <div className="mt-3 flex gap-4 text-xs text-slate-500">
+                  {order.address?.customerLat != null && (
+                    <span className="flex items-center gap-1">
+                      <span className="inline-block w-3 h-3 rounded-full bg-red-500"></span> Customer
+                    </span>
+                  )}
+                  {order.agentLat != null && (
+                    <span className="flex items-center gap-1">
+                      <span className="inline-block w-3 h-3 rounded-full bg-blue-500"></span> Agent
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Order Summary */}
             <div className="bg-white rounded-xl shadow-sm p-6">

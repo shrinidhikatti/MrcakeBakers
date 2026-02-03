@@ -30,6 +30,8 @@ export async function POST(request: Request) {
       deliveryFee,
       tax,
       total,
+      customerLat,
+      customerLng,
     } = body;
 
     // Validate required fields
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create address
+    // Create address with optional GPS coordinates
     const addressRecord = await prisma.address.create({
       data: {
         userId: session.user.id,
@@ -50,6 +52,8 @@ export async function POST(request: Request) {
         city,
         state: state || "Karnataka",
         pincode,
+        customerLat: customerLat != null ? parseFloat(customerLat) : null,
+        customerLng: customerLng != null ? parseFloat(customerLng) : null,
       },
     });
 

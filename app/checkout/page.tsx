@@ -26,11 +26,51 @@ export default function CheckoutPage() {
     deliverySlot: "9AM-12PM",
     specialInstructions: "",
   });
+  const [customerLocation, setCustomerLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [locationMethod, setLocationMethod] = useState<"gps" | "geocode" | null>(null);
 
   const subtotal = getTotal();
   const deliveryFee = subtotal > 500 ? 0 : 50;
   const tax = Math.round(subtotal * 0.05);
   const total = subtotal + deliveryFee + tax;
+
+  const getLocation = () => {
+    setLocationMethod("gps");
+    setLocationStatus("loading");
+    if (!navigator.geolocation) {
+      setLocationStatus("error");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCustomerLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationStatus("success");
+      },
+      () => setLocationStatus("error"),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const geocodeAddress = async () => {
+    setLocationMethod("geocode");
+    setLocationStatus("loading");
+    try {
+      const query = `${formData.address}, ${formData.city}, ${formData.state} ${formData.pincode}, India`;
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
+      );
+      const data = await res.json();
+      if (data.length > 0) {
+        setCustomerLocation({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        setLocationStatus("success");
+      } else {
+        setLocationStatus("error");
+      }
+    } catch {
+      setLocationStatus("error");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +88,8 @@ export default function CheckoutPage() {
         deliveryFee,
         tax,
         total,
+        customerLat: customerLocation?.lat ?? null,
+        customerLng: customerLocation?.lng ?? null,
       };
 
       const response = await fetch("/api/orders", {
@@ -196,6 +238,85 @@ export default function CheckoutPage() {
                         value={formData.pincode}
                         onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
                       />
+                    </div>
+
+                    {/* Precise Location */}
+                    <div className="md:col-span-2 mt-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Delivery Location
+                      </label>
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* GPS Button */}
+                        <button
+                          type="button"
+                          onClick={getLocation}
+                          disabled={locationStatus === "loading" && locationMethod === "gps"}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            locationMethod === "gps" && locationStatus === "success"
+                              ? "bg-green-100 text-green-700 border border-green-300"
+                              : locationMethod === "gps" && locationStatus === "error"
+                              ? "bg-red-100 text-red-700 border border-red-300"
+                              : "bg-primary-100 text-primary-700 border border-primary-300 hover:bg-primary-200"
+                          }`}
+                        >
+                          {locationMethod === "gps" && locationStatus === "loading" ? (
+                            <>
+                              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                              Getting Location...
+                            </>
+                          ) : locationMethod === "gps" && locationStatus === "success" ? (
+                            <>📍 GPS Captured</>
+                          ) : locationMethod === "gps" && locationStatus === "error" ? (
+                            <>⚠️ GPS Failed — Retry</>
+                          ) : (
+                            <>📍 Get My Precise Location</>
+                          )}
+                        </button>
+
+                        <span className="text-xs text-gray-400 font-medium">or</span>
+
+                        {/* Geocode from Address Button */}
+                        <button
+                          type="button"
+                          onClick={geocodeAddress}
+                          disabled={(locationStatus === "loading" && locationMethod === "geocode") || !formData.address || !formData.city}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            locationMethod === "geocode" && locationStatus === "success"
+                              ? "bg-green-100 text-green-700 border border-green-300"
+                              : locationMethod === "geocode" && locationStatus === "error"
+                              ? "bg-red-100 text-red-700 border border-red-300"
+                              : !formData.address || !formData.city
+                              ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                              : "bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200"
+                          }`}
+                        >
+                          {locationMethod === "geocode" && locationStatus === "loading" ? (
+                            <>
+                              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
+                              Finding Location...
+                            </>
+                          ) : locationMethod === "geocode" && locationStatus === "success" ? (
+                            <>🗺️ Address Located</>
+                          ) : locationMethod === "geocode" && locationStatus === "error" ? (
+                            <>⚠️ Not Found — Retry</>
+                          ) : (
+                            <>🗺️ Use My Address</>
+                          )}
+                        </button>
+                      </div>
+                      {locationStatus === "success" && customerLocation && (
+                        <p className="text-xs text-green-600 mt-1">
+                          Location saved: {customerLocation.lat.toFixed(6)}, {customerLocation.lng.toFixed(6)}
+                          {locationMethod === "geocode" && <span className="text-gray-500 ml-1">(approximate)</span>}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        {!formData.address || !formData.city
+                          ? "Fill in your address above to enable address-based location."
+                          : locationMethod === "geocode" && locationStatus === "success"
+                          ? "Approximate location from your address. Use GPS for precise location."
+                          : "Use GPS for precise location, or use your typed address for an approximate location."}
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -1,16 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatPrice } from "@/lib/utils";
-import { Package, Calendar } from "lucide-react";
+import { Package, Calendar, MapPin } from "lucide-react";
+import dynamic from "next/dynamic";
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function ProfileOrdersPage() {
   const { data: session } = useSession();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null);
+  const [trackingData, setTrackingData] = useState<{
+    agentLocation: { lat: number; lng: number } | null;
+    customerLocation: { lat: number; lng: number } | null;
+    agentName: string | null;
+    status: string;
+  } | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchTracking = useCallback(async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}/tracking`);
+      if (res.ok) {
+        const data = await res.json();
+        setTrackingData(data);
+      }
+    } catch {
+      console.error("Tracking fetch failed");
+    }
+  }, []);
+
+  // Start/stop polling when trackingOrderId changes
+  useEffect(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+    if (trackingOrderId) {
+      fetchTracking(trackingOrderId); // immediate fetch
+      pollRef.current = setInterval(() => fetchTracking(trackingOrderId), 10000);
+    } else {
+      setTrackingData(null);
+    }
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [trackingOrderId, fetchTracking]);
 
   useEffect(() => {
     fetchOrders();
@@ -35,10 +75,16 @@ export default function ProfileOrdersPage() {
       PENDING: "bg-yellow-100 text-yellow-800",
       CONFIRMED: "bg-blue-100 text-blue-800",
       PREPARING: "bg-purple-100 text-purple-800",
+      ASSIGNED: "bg-indigo-100 text-indigo-800",
+      PICKED_UP: "bg-cyan-100 text-cyan-800",
+      OUT_FOR_DELIVERY: "bg-orange-100 text-orange-800",
       DELIVERED: "bg-green-100 text-green-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
+
+  const isTrackable = (status: string) =>
+    status === "PICKED_UP" || status === "OUT_FOR_DELIVERY" || status === "ASSIGNED";
 
   return (
     <div className="min-h-screen flex flex-col bg-bakery-cream">
@@ -89,10 +135,15 @@ export default function ProfileOrdersPage() {
                   <div className="space-y-3">
                     {order.items.map((item: any) => {
                       const images = JSON.parse(item.product.images);
+                      const isUrl = images[0]?.startsWith("http");
                       return (
                         <div key={item.id} className="flex gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
-                            {images[0]}
+                          <div className="w-16 h-16 bg-gradient-to-br from-primary-50 to-pink-50 rounded-lg flex items-center justify-center text-3xl flex-shrink-0 relative overflow-hidden">
+                            {isUrl ? (
+                              <Image src={images[0]} alt={item.product.name} fill className="object-cover" sizes="64px" />
+                            ) : (
+                              <span>{images[0]}</span>
+                            )}
                           </div>
                           <div className="flex-grow">
                             <p className="font-semibold text-bakery-chocolate">{item.product.name}</p>
@@ -105,6 +156,45 @@ export default function ProfileOrdersPage() {
                       );
                     })}
                   </div>
+
+                  {/* Track Delivery */}
+                  {isTrackable(order.status) && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => setTrackingOrderId(trackingOrderId === order.id ? null : order.id)}
+                        className={`flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
+                          trackingOrderId === order.id
+                            ? "bg-blue-100 text-blue-700 border border-blue-300"
+                            : "bg-primary-100 text-primary-700 border border-primary-300 hover:bg-primary-200"
+                        }`}
+                      >
+                        <MapPin className="h-4 w-4" />
+                        {trackingOrderId === order.id ? "Hide Map" : "Track Delivery"}
+                      </button>
+
+                      {trackingOrderId === order.id && trackingData && (
+                        <div className="mt-3 space-y-2">
+                          {trackingData.agentName && (
+                            <p className="text-sm text-gray-600">
+                              🚗 <span className="font-medium">{trackingData.agentName}</span> is delivering your order
+                            </p>
+                          )}
+                          {trackingData.agentLocation ? (
+                            <MapView
+                              customerLocation={trackingData.customerLocation}
+                              agentLocation={trackingData.agentLocation}
+                              height="280px"
+                            />
+                          ) : (
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-500">
+                              📍 Agent location will appear once the delivery starts moving
+                            </div>
+                          )}
+                          <p className="text-xs text-gray-400 text-center">Updates every 10 seconds</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="border-t border-gray-200 mt-4 pt-4 flex items-center justify-between">
                     <span className="font-semibold text-gray-700">Total</span>

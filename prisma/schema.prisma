@@ -90,6 +90,8 @@ model Order {
   deliveryDate        DateTime
   deliverySlot        String
   specialInstructions String?
+  agentLat            Float?
+  agentLng            Float?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -112,14 +114,16 @@ model OrderItem {
 }
 
 model Address {
-  id       String  @id @default(cuid())
-  userId   String
-  fullName String
-  phone    String
-  address  String
-  city     String
-  state    String  @default("Karnataka")
-  pincode  String
+  id          String  @id @default(cuid())
+  userId     String
+  fullName    String
+  phone       String
+  address     String
+  city        String
+  state       String  @default("Karnataka")
+  pincode     String
+  customerLat Float?
+  customerLng Float?
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
