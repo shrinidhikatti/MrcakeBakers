@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { Package, MapPin, Phone, User, Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -147,22 +146,7 @@ export default function DeliveryDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Delivery Dashboard</h1>
-              <p className="text-slate-600 mt-1">Manage your delivery assignments</p>
-            </div>
-            <Link href="/" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-              ← Back to Store
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm p-6">
@@ -327,7 +311,6 @@ export default function DeliveryDashboard() {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 }

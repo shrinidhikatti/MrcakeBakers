@@ -68,7 +68,7 @@ export default function AdminProductsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
+      <div className="py-32 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading products...</p>
@@ -78,7 +78,7 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 py-8">
+    <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -90,13 +90,7 @@ export default function AdminProductsPage() {
               Manage your bakery products
             </p>
           </div>
-          <div className="flex gap-4">
-            <Link
-              href="/admin"
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-            >
-              Back to Dashboard
-            </Link>
+          <div>
             <Link
               href="/admin/products/new"
               className="btn-primary"

@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
-import { ArrowLeft, Search } from "lucide-react";
-
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,36 +39,25 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Link href="/admin" className="text-slate-600 hover:text-slate-900">
-              <ArrowLeft className="h-6 w-6" />
-            </Link>
-            <h1 className="text-3xl font-bold text-slate-900">Orders Management</h1>
-          </div>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-bold text-slate-900 mb-6">Orders Management</h1>
 
-          {/* Filters */}
-          <div className="flex gap-2">
-            {["", "PENDING", "CONFIRMED", "PREPARING", "DELIVERED"].map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  statusFilter === status
-                    ? "bg-primary-600 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                {status || "All Orders"}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Filters */}
+      <div className="flex gap-2 mb-6">
+        {["", "PENDING", "CONFIRMED", "PREPARING", "DELIVERED"].map((status) => (
+          <button
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              statusFilter === status
+                ? "bg-primary-600 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            {status || "All Orders"}
+          </button>
+        ))}
       </div>
-
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           {loading ? (
             <div className="py-20 text-center">
@@ -123,7 +110,6 @@ export default function AdminOrdersPage() {
             </table>
           )}
         </div>
-      </div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
   Settings,
   Store,
@@ -60,23 +59,15 @@ export default function AdminSettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-cream-50 py-8">
+    <div className="py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Settings className="h-8 w-8 text-primary-600" />
-              Store Settings
-            </h1>
-            <p className="mt-2 text-gray-600">Manage your store configuration</p>
-          </div>
-          <Link
-            href="/admin"
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Back to Dashboard
-          </Link>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Settings className="h-8 w-8 text-primary-600" />
+            Store Settings
+          </h1>
+          <p className="mt-2 text-gray-600">Manage your store configuration</p>
         </div>
 
         {message && (

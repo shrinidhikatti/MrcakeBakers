@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Users, Mail, Calendar, ShoppingBag, Heart, Plus, Truck } from 'lucide-react';
 
 interface User {
@@ -86,7 +85,7 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
+      <div className="py-32 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading users...</p>
@@ -96,7 +95,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 py-8">
+    <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -104,7 +103,7 @@ export default function AdminUsersPage() {
             <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
             <p className="mt-2 text-gray-600">Manage customer and delivery partner accounts</p>
           </div>
-          <div className="flex gap-3">
+          <div>
             <button
               onClick={() => setShowAddDeliveryPartner(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -112,12 +111,6 @@ export default function AdminUsersPage() {
               <Plus className="h-4 w-4" />
               Add Delivery Partner
             </button>
-            <Link
-              href="/admin"
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-            >
-              Back to Dashboard
-            </Link>
           </div>
         </div>
 

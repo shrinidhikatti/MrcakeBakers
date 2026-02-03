@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { User, Package, MapPin } from "lucide-react";
+import ProfileEditor from "@/components/ProfileEditor";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -106,6 +107,8 @@ export default async function ProfilePage() {
                     </a>
                   </div>
                 </div>
+
+                <ProfileEditor />
               </div>
             </div>
           </div>

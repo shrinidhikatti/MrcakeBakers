@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, phone } = await request.json();
+    const { name, email, password, phone, birthday, specialDays } = await request.json();
 
     // Validate input
     if (!name || !email || !password) {
@@ -36,9 +36,25 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         phone: phone || null,
+        birthday: birthday ? birthday.slice(5) : null, // extract MM-DD from YYYY-MM-DD
         role: "CUSTOMER",
       },
     });
+
+    // Create special days (loved ones) added at signup
+    if (Array.isArray(specialDays) && specialDays.length > 0) {
+      await prisma.specialDay.createMany({
+        data: specialDays
+          .filter((sd: any) => sd.name && sd.date)
+          .map((sd: any) => ({
+            userId: user.id,
+            name: sd.name,
+            date: sd.date.slice(5), // YYYY-MM-DD → MM-DD
+            type: sd.type || "BIRTHDAY",
+            relationship: sd.relationship || "Other",
+          })),
+      });
+    }
 
     return NextResponse.json(
       { message: "User created successfully", userId: user.id },
