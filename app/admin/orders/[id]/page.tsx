@@ -270,8 +270,8 @@ export default function OrderDetailPage() {
                 Delivery Address
               </h2>
               <div className="text-sm text-slate-600 space-y-1">
-                <p>{order.address}</p>
-                <p>{order.city}, {order.state} {order.pincode}</p>
+                <p>{order.address?.address}</p>
+                <p>{order.address?.city}, {order.address?.state} {order.address?.pincode}</p>
               </div>
               {order.deliverySlot && (
                 <div className="mt-4 pt-4 border-t">

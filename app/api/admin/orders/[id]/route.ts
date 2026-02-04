@@ -27,6 +27,7 @@ export async function GET(
             phone: true,
           },
         },
+        address: true,
         items: {
           include: {
             product: true,
@@ -94,6 +95,7 @@ export async function PATCH(
             phone: true,
           },
         },
+        address: true,
         items: {
           include: {
             product: true,
