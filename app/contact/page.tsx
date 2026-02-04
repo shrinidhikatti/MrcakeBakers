@@ -12,12 +12,14 @@ export default async function ContactPage() {
 
       <main className="flex-grow">
         <div
-          className="text-white py-16 bg-cover bg-center"
+          className="relative text-white py-16 bg-cover bg-center"
           style={{ backgroundImage: "url('/b6.png')" }}
         >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-            <p className="text-xl text-white/90">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/55"></div>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Contact Us</h1>
+            <div className="mt-3 mx-auto w-16 h-1 bg-white rounded-full opacity-80"></div>
+            <p className="text-xl text-white/90 mt-4 drop-shadow">
               We'd love to hear from you
             </p>
           </div>
@@ -28,9 +30,10 @@ export default async function ContactPage() {
             {/* Contact Info */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-3xl font-bold text-bakery-chocolate mb-6">
+                <h2 className="text-3xl font-bold text-bakery-chocolate mb-3">
                   Get In Touch
                 </h2>
+                <div className="w-16 h-1 bg-primary-600 rounded-full mb-6"></div>
                 <p className="text-lg text-gray-600 mb-8">
                   Have a question or special request? We're here to help! Reach out
                   through any of the channels below.
@@ -39,7 +42,7 @@ export default async function ContactPage() {
 
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-pink-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                     <Phone className="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
@@ -50,7 +53,7 @@ export default async function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-pink-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                     <Mail className="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
@@ -61,7 +64,7 @@ export default async function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-pink-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                     <MapPin className="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
@@ -72,7 +75,7 @@ export default async function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-pink-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                     <Clock className="h-6 w-6 text-primary-600" />
                   </div>
                   <div>
@@ -85,7 +88,7 @@ export default async function ContactPage() {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
               <h3 className="text-2xl font-bold text-bakery-chocolate mb-6">
                 Send Us a Message
               </h3>

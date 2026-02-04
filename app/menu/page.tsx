@@ -26,12 +26,14 @@ export default async function MenuPage() {
 
       <main className="flex-grow">
         <div
-          className="text-white py-16 bg-cover bg-center"
+          className="relative text-white py-16 bg-cover bg-center"
           style={{ backgroundImage: "url('/b3.png')" }}
         >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Menu</h1>
-            <p className="text-xl text-white/90">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/55"></div>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Our Menu</h1>
+            <div className="mt-3 mx-auto w-16 h-1 bg-white rounded-full opacity-80"></div>
+            <p className="text-xl text-white/90 mt-4 drop-shadow">
               Explore our complete range of delicious offerings
             </p>
           </div>
@@ -40,19 +42,22 @@ export default async function MenuPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
           {categories.map((category) => (
             <div key={category.id} className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-bakery-chocolate">
-                  {category.name}
-                </h2>
-                <Link
-                  href={`/products?category=${category.slug}`}
-                  className="text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  View All →
-                </Link>
+              <div className="mb-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-3xl font-bold text-bakery-chocolate">
+                    {category.name}
+                  </h2>
+                  <Link
+                    href={`/products?category=${category.slug}`}
+                    className="text-primary-600 hover:text-primary-700 font-medium hover:underline"
+                  >
+                    View All →
+                  </Link>
+                </div>
+                <div className="mt-2 w-12 h-1 bg-primary-600 rounded-full"></div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full">
                   <tbody className="divide-y divide-gray-100">
                     {category.products.length > 0 ? (
@@ -69,7 +74,7 @@ export default async function MenuPage() {
                         const isUrl = firstImage?.startsWith('http');
 
                         return (
-                          <tr key={product.id} className="hover:bg-gray-50">
+                          <tr key={product.id} className="hover:bg-primary-50 transition-colors">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-4">
                                 {isUrl ? (

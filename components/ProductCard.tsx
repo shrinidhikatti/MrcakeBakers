@@ -44,25 +44,25 @@ export default function ProductCard({ product, priority }: { product: Product; p
 
   return (
     <Link href={`/products/${product.slug}`} className="group">
-      <div className="card h-full flex flex-col">
+      <div className="card h-full flex flex-col group-hover:shadow-lg group-hover:-translate-y-1 transition-all duration-300">
         <div className="relative aspect-square overflow-hidden rounded-lg mb-4 bg-gradient-to-br from-primary-50 to-pink-50">
           {isUrl ? (
             <Image
               src={firstImage}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority={priority}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl">
+            <div className="w-full h-full flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-500">
               {firstImage}
             </div>
           )}
           {product.featured && (
-            <div className="absolute top-3 left-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-              Featured
+            <div className="absolute top-3 left-3 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+              ✨ Featured
             </div>
           )}
           <div className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md">

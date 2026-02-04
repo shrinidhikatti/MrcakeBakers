@@ -46,12 +46,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       <main className="flex-grow">
         <div
-          className="text-white py-16 bg-cover bg-center"
+          className="relative text-white py-16 bg-cover bg-center"
           style={{ backgroundImage: "url('/b1.png')" }}
         >
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Products</h1>
-            <p className="text-xl text-white/90">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/55"></div>
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Our Products</h1>
+            <div className="mt-3 mx-auto w-16 h-1 bg-white rounded-full opacity-80"></div>
+            <p className="text-xl text-white/90 mt-4 drop-shadow">
               Discover our delicious selection of freshly baked goods
             </p>
           </div>
@@ -59,7 +61,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
           {/* Category Filter */}
-          <div className="mb-8 flex flex-wrap gap-3">
+          <div className="mb-8 flex flex-wrap gap-3 pb-6 border-b border-gray-200">
             <Link
               href="/products"
               className={`px-5 py-2 rounded-full font-medium transition-colors ${
