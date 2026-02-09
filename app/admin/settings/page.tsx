@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Settings,
   Store,
@@ -12,12 +12,14 @@ import {
   MapPin,
   Clock,
   Save,
+  Layout,
 } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState('store');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [activeHero, setActiveHero] = useState('variant1');
 
   const [storeSettings, setStoreSettings] = useState({
     storeName: 'MrCake Bakers',
@@ -43,17 +45,56 @@ export default function AdminSettingsPage() {
     promotionalEmails: false,
   });
 
+  // Load current hero selection on mount
+  useEffect(() => {
+    const fetchHeroSettings = async () => {
+      try {
+        const response = await fetch('/api/admin/settings/hero');
+        if (response.ok) {
+          const data = await response.json();
+          setActiveHero(data.activeHeroId || 'variant1');
+        }
+      } catch (error) {
+        console.error('Error fetching hero settings:', error);
+      }
+    };
+
+    fetchHeroSettings();
+  }, []);
+
   const handleSave = async () => {
     setSaving(true);
-    // Simulate save - in production, this would call an API
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    if (activeTab === 'hero') {
+      // Save hero selection to database
+      try {
+        const response = await fetch('/api/admin/settings/hero', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ heroId: activeHero }),
+        });
+
+        if (response.ok) {
+          setMessage('Hero selection saved successfully!');
+        } else {
+          setMessage('Failed to save hero selection');
+        }
+      } catch (error) {
+        setMessage('Error saving hero selection');
+      }
+    } else {
+      // Simulate save for other tabs - in production, this would call an API
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setMessage('Settings saved successfully!');
+    }
+
     setSaving(false);
-    setMessage('Settings saved successfully!');
     setTimeout(() => setMessage(''), 3000);
   };
 
   const tabs = [
     { id: 'store', label: 'Store Info', icon: Store },
+    { id: 'hero', label: 'Hero Section', icon: Layout },
     { id: 'delivery', label: 'Delivery', icon: Truck },
     { id: 'notifications', label: 'Notifications', icon: Bell },
   ];
@@ -193,6 +234,139 @@ export default function AdminSettingsPage() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Hero Selection Tab */}
+            {activeTab === 'hero' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Select Homepage Hero Section
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Choose which hero design to display on your homepage. Changes will be visible to all visitors.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Hero Variant 1 - Light Theme */}
+                  <label
+                    className={`relative cursor-pointer rounded-xl overflow-hidden border-4 transition-all ${
+                      activeHero === 'variant1'
+                        ? 'border-primary-600 shadow-lg'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="hero"
+                      value="variant1"
+                      checked={activeHero === 'variant1'}
+                      onChange={(e) => setActiveHero(e.target.value)}
+                      className="sr-only"
+                    />
+                    <div className="aspect-video bg-gradient-to-br from-pink-100 via-orange-50 to-yellow-100 p-4 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-800 mb-2">
+                          Sweet Moments
+                        </div>
+                        <div className="text-sm text-gray-600">Light & Warm Theme</div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900">Hero Variant 1</p>
+                          <p className="text-xs text-gray-500">Traditional bakery feel</p>
+                        </div>
+                        {activeHero === 'variant1' && (
+                          <div className="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Hero Variant 2 - Dark Theme */}
+                  <label
+                    className={`relative cursor-pointer rounded-xl overflow-hidden border-4 transition-all ${
+                      activeHero === 'variant2'
+                        ? 'border-primary-600 shadow-lg'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="hero"
+                      value="variant2"
+                      checked={activeHero === 'variant2'}
+                      onChange={(e) => setActiveHero(e.target.value)}
+                      className="sr-only"
+                    />
+                    <div className="aspect-video bg-gradient-to-br from-gray-900 via-gray-800 to-red-950 p-4 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-white mb-2">
+                          Art of Baking
+                        </div>
+                        <div className="text-sm text-gray-300">Modern & Premium</div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900">Hero Variant 2</p>
+                          <p className="text-xs text-gray-500">Sleek & artistic design</p>
+                        </div>
+                        {activeHero === 'variant2' && (
+                          <div className="w-6 h-6 bg-primary-600 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Placeholder for Variant 3 */}
+                  <label className="relative cursor-not-allowed rounded-xl overflow-hidden border-4 border-dashed border-gray-300 opacity-50">
+                    <div className="aspect-video bg-gray-100 p-4 flex items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <div className="text-2xl mb-2">+</div>
+                        <div className="text-sm">Hero Variant 3</div>
+                        <div className="text-xs">Coming Soon</div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white">
+                      <p className="font-semibold text-gray-400">Available Soon</p>
+                    </div>
+                  </label>
+
+                  {/* Placeholder for Variant 4 */}
+                  <label className="relative cursor-not-allowed rounded-xl overflow-hidden border-4 border-dashed border-gray-300 opacity-50">
+                    <div className="aspect-video bg-gray-100 p-4 flex items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <div className="text-2xl mb-2">+</div>
+                        <div className="text-sm">Hero Variant 4</div>
+                        <div className="text-xs">Coming Soon</div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white">
+                      <p className="font-semibold text-gray-400">Available Soon</p>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                  <p className="text-sm text-blue-800">
+                    <strong>Tip:</strong> You can create and add more hero variants by adding new components to the{' '}
+                    <code className="bg-blue-100 px-1 py-0.5 rounded">components/heroes/</code> folder.
+                  </p>
                 </div>
               </div>
             )}

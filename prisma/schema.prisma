@@ -167,3 +167,9 @@ model SpecialDay {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model SiteSettings {
+  id           String   @id @default("main")
+  activeHeroId String   @default("variant1") // variant1, variant2, variant3, variant4
+  updatedAt    DateTime @updatedAt
+}
