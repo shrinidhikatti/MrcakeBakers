@@ -105,7 +105,17 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Mr.Cake. All rights reserved. Made with ❤️ by Shrinidhi Katti</p>
+          <p>
+            &copy; {new Date().getFullYear()} Mr.Cake. All rights reserved. Made with ❤️ by{' '}
+            <a
+              href="https://www.prashanvitech.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-400 hover:text-primary-300 transition-colors underline decoration-dotted"
+            >
+              Shrinidhi Katti
+            </a>
+          </p>
         </div>
       </div>
     </footer>
