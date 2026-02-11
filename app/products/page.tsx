@@ -2,43 +2,126 @@ import { auth } from "@/auth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import ProductFilters from "@/components/ProductFilters";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { unstable_cache } from "next/cache";
 
-const getProductsAndCategories = unstable_cache(
-  async (categorySlug?: string) => {
-    const [products, categories] = await Promise.all([
-      prisma.product.findMany({
-        where: {
-          inStock: true,
-          ...(categorySlug && {
-            category: {
-              slug: categorySlug,
-            },
-          }),
-        },
-        include: { category: true },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.category.findMany(),
-    ]);
-    return { products, categories };
-  },
-  ["products-page"],
-  { revalidate: 60 }
-);
+async function getProductsAndCategories(filters: {
+  categorySlug?: string;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: string;
+  inStock?: boolean;
+}) {
+  const { categorySlug, search, minPrice, maxPrice, sort, inStock } = filters;
+
+  // Build where clause
+  const where: any = {};
+
+  // Category filter
+  if (categorySlug) {
+    where.category = { slug: categorySlug };
+  }
+
+  // Search filter
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+      { category: { name: { contains: search, mode: 'insensitive' } } },
+    ];
+  }
+
+  // Price range filter
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    where.price = {};
+    if (minPrice !== undefined) where.price.gte = minPrice;
+    if (maxPrice !== undefined) where.price.lte = maxPrice;
+  }
+
+  // Stock filter
+  if (inStock) {
+    where.inStock = true;
+  }
+
+  // Build orderBy clause
+  let orderBy: any = { createdAt: 'desc' }; // default
+
+  switch (sort) {
+    case 'price-low':
+      orderBy = { price: 'asc' };
+      break;
+    case 'price-high':
+      orderBy = { price: 'desc' };
+      break;
+    case 'name-asc':
+      orderBy = { name: 'asc' };
+      break;
+    case 'name-desc':
+      orderBy = { name: 'desc' };
+      break;
+    case 'newest':
+    default:
+      orderBy = { createdAt: 'desc' };
+      break;
+  }
+
+  // Fetch products and categories
+  const [products, categories, priceStats] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: { category: true },
+      orderBy,
+    }),
+    prisma.category.findMany(),
+    prisma.product.aggregate({
+      _min: { price: true },
+      _max: { price: true },
+    }),
+  ]);
+
+  return {
+    products,
+    categories,
+    minPrice: priceStats._min.price || 0,
+    maxPrice: priceStats._max.price || 10000,
+  };
+}
 
 interface ProductsPageProps {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{
+    category?: string;
+    search?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    sort?: string;
+    inStock?: string;
+  }>;
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const session = await auth();
   const params = await searchParams;
-  const categorySlug = params.category;
 
-  const { products, categories } = await getProductsAndCategories(categorySlug);
+  const filters = {
+    categorySlug: params.category,
+    search: params.search,
+    minPrice: params.minPrice ? Number(params.minPrice) : undefined,
+    maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
+    sort: params.sort,
+    inStock: params.inStock === 'true',
+  };
+
+  const { products, categories, minPrice, maxPrice } = await getProductsAndCategories(filters);
+
+  const activeFiltersCount = [
+    params.search,
+    params.minPrice,
+    params.maxPrice,
+    params.sort && params.sort !== 'newest',
+    params.inStock,
+  ].filter(Boolean).length;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -65,7 +148,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <Link
               href="/products"
               className={`px-5 py-2 rounded-full font-medium transition-colors ${
-                !categorySlug
+                !params.category
                   ? "bg-primary-600 text-white"
                   : "bg-white border-2 border-gray-200 text-gray-700 hover:border-primary-600 hover:text-primary-600"
               }`}
@@ -77,7 +160,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 key={category.id}
                 href={`/products?category=${category.slug}`}
                 className={`px-5 py-2 rounded-full font-medium transition-colors ${
-                  categorySlug === category.slug
+                  params.category === category.slug
                     ? "bg-primary-600 text-white"
                     : "bg-white border-2 border-gray-200 text-gray-700 hover:border-primary-600 hover:text-primary-600"
                 }`}
@@ -87,18 +170,42 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             ))}
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product, index) => (
-              <ProductCard key={product.id} product={product} priority={index < 4} />
-            ))}
+          {/* Search & Filters */}
+          <ProductFilters minPrice={minPrice} maxPrice={maxPrice} />
+
+          {/* Results Summary */}
+          <div className="mb-6 flex items-center justify-between">
+            <p className="text-gray-600">
+              <span className="font-semibold">{products.length}</span> product{products.length !== 1 && 's'} found
+              {activeFiltersCount > 0 && (
+                <span className="ml-2 text-sm">
+                  ({activeFiltersCount} filter{activeFiltersCount !== 1 && 's'} applied)
+                </span>
+              )}
+            </p>
           </div>
 
-          {products.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-xl text-gray-600">No products found in this category.</p>
-              <Link href="/products" className="text-primary-600 hover:underline mt-2 inline-block">
-                View all products
+          {/* Products Grid */}
+          {products.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product, index) => (
+                <ProductCard key={product.id} product={product} priority={index < 4} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-gray-50 rounded-lg">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+              <p className="text-gray-600 mb-6">
+                {params.search
+                  ? `No results for "${params.search}"`
+                  : "Try adjusting your filters or browse all products"}
+              </p>
+              <Link
+                href="/products"
+                className="inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                View All Products
               </Link>
             </div>
           )}
