@@ -158,41 +158,50 @@ export default function ProfileOrdersPage() {
                   </div>
 
                   {/* Track Delivery */}
-                  {isTrackable(order.status) && (
-                    <div className="mt-4">
-                      <button
-                        onClick={() => setTrackingOrderId(trackingOrderId === order.id ? null : order.id)}
-                        className={`flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
-                          trackingOrderId === order.id
-                            ? "bg-blue-100 text-blue-700 border border-blue-300"
-                            : "bg-primary-100 text-primary-700 border border-primary-300 hover:bg-primary-200"
-                        }`}
+                  {order.status !== "DELIVERED" && order.status !== "CANCELLED" && (
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      {isTrackable(order.status) && (
+                        <button
+                          onClick={() => setTrackingOrderId(trackingOrderId === order.id ? null : order.id)}
+                          className={`flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
+                            trackingOrderId === order.id
+                              ? "bg-blue-100 text-blue-700 border border-blue-300"
+                              : "bg-primary-100 text-primary-700 border border-primary-300 hover:bg-primary-200"
+                          }`}
+                        >
+                          <MapPin className="h-4 w-4" />
+                          {trackingOrderId === order.id ? "Hide Map" : "Track on Map"}
+                        </button>
+                      )}
+                      <a
+                        href={`/track/${order.id}`}
+                        className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200 transition-colors"
                       >
-                        <MapPin className="h-4 w-4" />
-                        {trackingOrderId === order.id ? "Hide Map" : "Track Delivery"}
-                      </button>
+                        <Package className="h-4 w-4" />
+                        Full Tracking
+                      </a>
+                    </div>
+                  )}
 
-                      {trackingOrderId === order.id && trackingData && (
-                        <div className="mt-3 space-y-2">
-                          {trackingData.agentName && (
-                            <p className="text-sm text-gray-600">
-                              🚗 <span className="font-medium">{trackingData.agentName}</span> is delivering your order
-                            </p>
-                          )}
-                          {trackingData.agentLocation ? (
-                            <MapView
-                              customerLocation={trackingData.customerLocation}
-                              agentLocation={trackingData.agentLocation}
-                              height="280px"
-                            />
-                          ) : (
-                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-500">
-                              📍 Agent location will appear once the delivery starts moving
-                            </div>
-                          )}
-                          <p className="text-xs text-gray-400 text-center">Updates every 10 seconds</p>
+                  {isTrackable(order.status) && trackingOrderId === order.id && trackingData && (
+                    <div className="mt-3 space-y-2">
+                      {trackingData.agentName && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">{trackingData.agentName}</span> is delivering your order
+                        </p>
+                      )}
+                      {trackingData.agentLocation ? (
+                        <MapView
+                          customerLocation={trackingData.customerLocation}
+                          agentLocation={trackingData.agentLocation}
+                          height="280px"
+                        />
+                      ) : (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-500">
+                          Agent location will appear once the delivery starts moving
                         </div>
                       )}
+                      <p className="text-xs text-gray-400 text-center">Updates every 10 seconds</p>
                     </div>
                   )}
 

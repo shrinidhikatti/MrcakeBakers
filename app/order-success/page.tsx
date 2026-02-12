@@ -78,12 +78,20 @@ function OrderSuccessContent() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {orderId && (
+            <button
+              onClick={() => router.push(`/track/${orderId}`)}
+              className="btn-primary flex items-center justify-center gap-2"
+            >
+              Track Order
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          )}
           <button
             onClick={() => router.push("/profile")}
-            className="btn-primary flex items-center justify-center gap-2"
+            className="btn-secondary flex items-center justify-center gap-2"
           >
             View My Orders
-            <ArrowRight className="h-5 w-5" />
           </button>
           <button
             onClick={() => router.push("/products")}

@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { User, Package, MapPin } from "lucide-react";
+import { User, Package, MapPin, Award } from "lucide-react";
 import ProfileEditor from "@/components/ProfileEditor";
 
 export default async function ProfilePage() {
@@ -57,6 +57,13 @@ export default async function ProfilePage() {
                   >
                     <MapPin className="h-5 w-5" />
                     Addresses
+                  </a>
+                  <a
+                    href="/profile/loyalty"
+                    className="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    <Award className="h-5 w-5" />
+                    Loyalty Rewards
                   </a>
                 </nav>
               </div>

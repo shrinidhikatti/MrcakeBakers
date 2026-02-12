@@ -19,6 +19,7 @@ export async function GET(
       where: { id },
       include: {
         category: true,
+        variants: true,
       },
     });
 
@@ -62,6 +63,7 @@ export async function PUT(
       ingredients,
       allergens,
       featured,
+      variants,
     } = body;
 
     // Map 'image' from request to 'images' for database
@@ -90,6 +92,22 @@ export async function PUT(
       }
     }
 
+    // Handle variant updates if provided
+    if (variants !== undefined) {
+      // Delete old variants and recreate
+      await prisma.productVariant.deleteMany({ where: { productId: id } });
+      if (variants && variants.length > 0) {
+        await prisma.productVariant.createMany({
+          data: variants.map((v: any) => ({
+            productId: id,
+            type: v.type,
+            name: v.name,
+            priceModifier: parseFloat(v.priceModifier || '0'),
+          })),
+        });
+      }
+    }
+
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -109,6 +127,7 @@ export async function PUT(
       },
       include: {
         category: true,
+        variants: true,
       },
     });
 

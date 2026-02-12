@@ -8,7 +8,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCartStore } from "@/store/cartStore";
 import { formatPrice, generateOrderNumber } from "@/lib/utils";
-import { Calendar, Clock, MapPin, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, Loader2, Award } from "lucide-react";
+import CouponInput from "@/components/CouponInput";
+import PointsRedemption from "@/components/PointsRedemption";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -29,11 +31,15 @@ export default function CheckoutPage() {
   const [customerLocation, setCustomerLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [locationMethod, setLocationMethod] = useState<"gps" | "geocode" | null>(null);
+  const [couponCode, setCouponCode] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [pointsDiscount, setPointsDiscount] = useState(0);
 
   const subtotal = getTotal();
   const deliveryFee = subtotal > 500 ? 0 : 50;
-  const tax = Math.round(subtotal * 0.05);
-  const total = subtotal + deliveryFee + tax;
+  const tax = Math.round((subtotal - couponDiscount) * 0.05);
+  const total = subtotal + deliveryFee + tax - couponDiscount - pointsDiscount;
 
   const getLocation = () => {
     setLocationMethod("gps");
@@ -83,6 +89,9 @@ export default function CheckoutPage() {
           productId: item.id,
           quantity: item.quantity,
           price: item.price,
+          variantSelections: (item as any).variantSelections || null,
+          customText: (item as any).customText || null,
+          customImage: (item as any).customImage || null,
         })),
         subtotal,
         deliveryFee,
@@ -90,6 +99,9 @@ export default function CheckoutPage() {
         total,
         customerLat: customerLocation?.lat ?? null,
         customerLng: customerLocation?.lng ?? null,
+        couponCode: couponCode || null,
+        discountAmount: couponDiscount,
+        pointsToRedeem: pointsToRedeem || 0,
       };
 
       const response = await fetch("/api/orders", {
@@ -414,11 +426,55 @@ export default function CheckoutPage() {
                     })}
                   </div>
 
+                  {/* Coupon */}
+                  <div className="border-t border-gray-200 pt-4">
+                    <CouponInput
+                      subtotal={subtotal}
+                      onApply={(code, discount) => {
+                        setCouponCode(code);
+                        setCouponDiscount(discount);
+                      }}
+                      onRemove={() => {
+                        setCouponCode(null);
+                        setCouponDiscount(0);
+                      }}
+                      appliedCode={couponCode}
+                      discount={couponDiscount}
+                    />
+                  </div>
+
+                  {/* Points Redemption */}
+                  {session?.user && (
+                    <div className="border-t border-gray-200 pt-4">
+                      <PointsRedemption
+                        orderTotal={subtotal - couponDiscount + deliveryFee}
+                        onRedeem={(points, discount) => {
+                          setPointsToRedeem(points);
+                          setPointsDiscount(discount);
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <div className="border-t border-gray-200 pt-4 space-y-3">
                     <div className="flex justify-between text-gray-600">
                       <span>Subtotal</span>
                       <span className="font-semibold">{formatPrice(subtotal)}</span>
                     </div>
+
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Coupon Discount</span>
+                        <span className="font-semibold">-{formatPrice(couponDiscount)}</span>
+                      </div>
+                    )}
+
+                    {pointsDiscount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Points Discount</span>
+                        <span className="font-semibold">-{formatPrice(pointsDiscount)}</span>
+                      </div>
+                    )}
 
                     <div className="flex justify-between text-gray-600">
                       <span>Delivery Fee</span>

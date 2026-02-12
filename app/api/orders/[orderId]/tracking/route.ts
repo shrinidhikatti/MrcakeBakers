@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { haversineDistance, estimateETA } from "@/lib/geo";
 
 // Customer polls this endpoint to get agent's current location + customer's saved location
 export async function GET(
@@ -25,15 +26,47 @@ export async function GET(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    const agentLocation =
+      order.agentLat != null && order.agentLng != null
+        ? { lat: order.agentLat, lng: order.agentLng }
+        : null;
+
+    const customerLocation =
+      order.address.customerLat != null && order.address.customerLng != null
+        ? { lat: order.address.customerLat, lng: order.address.customerLng }
+        : null;
+
+    // Calculate ETA if both locations exist
+    let etaMinutes: number | null = null;
+    if (agentLocation && customerLocation) {
+      const distance = haversineDistance(
+        agentLocation.lat,
+        agentLocation.lng,
+        customerLocation.lat,
+        customerLocation.lng
+      );
+      etaMinutes = estimateETA(distance);
+    }
+
+    // Parse status history
+    let statusHistory: any[] = [];
+    if (order.statusHistory) {
+      try {
+        statusHistory = JSON.parse(order.statusHistory);
+      } catch {}
+    }
+
     return NextResponse.json({
       status: order.status,
-      agentLocation: order.agentLat != null && order.agentLng != null
-        ? { lat: order.agentLat, lng: order.agentLng }
-        : null,
-      customerLocation: order.address.customerLat != null && order.address.customerLng != null
-        ? { lat: order.address.customerLat, lng: order.address.customerLng }
-        : null,
+      agentLocation,
+      customerLocation,
       agentName: order.deliveryPartner?.name || null,
+      etaMinutes,
+      statusHistory,
+      orderNumber: order.orderNumber,
+      deliveryDate: order.deliveryDate,
+      deliverySlot: order.deliverySlot,
+      address: `${order.address.address}, ${order.address.city} ${order.address.pincode}`,
     });
   } catch (error) {
     console.error("Error fetching tracking:", error);

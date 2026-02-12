@@ -7,6 +7,10 @@ export interface CartItem {
   price: number
   quantity: number
   image: string
+  variantSelections?: Record<string, { variantId: string; name: string; priceModifier: number }>
+  customText?: string
+  customImage?: string
+  isCustomCake?: boolean
 }
 
 interface CartStore {
@@ -26,15 +30,33 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (item) => {
         set((state) => {
-          const existingItem = state.items.find((i) => i.id === item.id)
+          // Generate a unique key based on product + variants + customization
+          const variantKey = item.variantSelections
+            ? JSON.stringify(item.variantSelections)
+            : '';
+          const customKey = `${item.customText || ''}|${item.customImage || ''}`;
+          const itemKey = `${item.id}:${variantKey}:${customKey}`;
+
+          const existingItem = state.items.find((i) => {
+            const existingVariantKey = i.variantSelections
+              ? JSON.stringify(i.variantSelections)
+              : '';
+            const existingCustomKey = `${i.customText || ''}|${i.customImage || ''}`;
+            return `${i.id}:${existingVariantKey}:${existingCustomKey}` === itemKey;
+          })
 
           if (existingItem) {
             return {
-              items: state.items.map((i) =>
-                i.id === item.id
+              items: state.items.map((i) => {
+                const iVariantKey = i.variantSelections
+                  ? JSON.stringify(i.variantSelections)
+                  : '';
+                const iCustomKey = `${i.customText || ''}|${i.customImage || ''}`;
+                const iKey = `${i.id}:${iVariantKey}:${iCustomKey}`;
+                return iKey === itemKey
                   ? { ...i, quantity: i.quantity + item.quantity }
-                  : i
-              ),
+                  : i;
+              }),
             }
           }
 

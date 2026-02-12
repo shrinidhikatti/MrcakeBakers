@@ -13,6 +13,8 @@ interface Product {
   image: string;
   inStock: boolean;
   featured: boolean;
+  quantity: number;
+  lowStockAlert: number;
   category: {
     id: string;
     name: string;
@@ -122,6 +124,9 @@ export default function AdminProductsPage() {
                     Price
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -136,7 +141,7 @@ export default function AdminProductsPage() {
                 {products.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-6 py-8 text-center text-gray-500"
                     >
                       No products found. Add your first product to get started.
@@ -165,6 +170,22 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         ₹{product.price.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`text-sm font-semibold ${
+                            product.quantity <= 0
+                              ? 'text-red-600'
+                              : product.quantity <= product.lowStockAlert
+                              ? 'text-yellow-600'
+                              : 'text-green-600'
+                          }`}
+                        >
+                          {product.quantity}
+                        </span>
+                        {product.quantity > 0 && product.quantity <= product.lowStockAlert && (
+                          <span className="ml-1 text-xs text-yellow-500">Low</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span

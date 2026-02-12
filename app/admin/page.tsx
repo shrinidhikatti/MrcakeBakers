@@ -13,6 +13,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import LowStockWidget from "@/components/LowStockWidget";
 
 interface Stats {
   totalRevenue: number;
@@ -176,6 +177,11 @@ export default function AdminDashboard() {
               </div>
             </div>
           </Link>
+        </div>
+
+        {/* Low Stock Widget */}
+        <div className="mb-8">
+          <LowStockWidget />
         </div>
 
         {/* Recent Orders */}

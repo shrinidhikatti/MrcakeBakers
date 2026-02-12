@@ -28,6 +28,7 @@ export default function Header({ user }: HeaderProps) {
   const navigation = [
     { name: "Home", href: "/" },
     { name: "Products", href: "/products" },
+    { name: "Custom Cake", href: "/cake-builder" },
     { name: "Menu", href: "/menu" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },

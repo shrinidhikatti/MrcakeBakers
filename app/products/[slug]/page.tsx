@@ -9,6 +9,15 @@ import Footer from "@/components/Footer";
 import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/store/cartStore";
 import { Minus, Plus, ShoppingCart, Heart, Star, Package, Clock, Award } from "lucide-react";
+import VariantSelector from "@/components/VariantSelector";
+import CakeCustomizer from "@/components/CakeCustomizer";
+
+interface Variant {
+  id: string;
+  type: string;
+  name: string;
+  priceModifier: number;
+}
 
 interface Product {
   id: string;
@@ -25,6 +34,7 @@ interface Product {
   category: {
     name: string;
   };
+  variants?: Variant[];
 }
 
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -34,6 +44,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [slug, setSlug] = useState<string>("");
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [customText, setCustomText] = useState("");
+  const [customImage, setCustomImage] = useState("");
   const addItem = useCartStore((state) => state.addItem);
 
   useEffect(() => {
@@ -61,16 +74,45 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     fetchProduct();
   }, [slug]);
 
+  // Calculate variant price modifier
+  const getVariantModifier = () => {
+    if (!product?.variants) return 0;
+    return Object.entries(selectedVariants).reduce((total, [type, variantId]) => {
+      const variant = product.variants?.find((v) => v.id === variantId);
+      return total + (variant?.priceModifier || 0);
+    }, 0);
+  };
+
+  const variantModifier = getVariantModifier();
+  const effectivePrice = (product?.price || 0) + variantModifier;
+
   const handleAddToCart = () => {
     if (!product) return;
 
     const images = JSON.parse(product.images);
+
+    // Build variant selections map
+    const variantSelections: Record<string, { variantId: string; name: string; priceModifier: number }> = {};
+    Object.entries(selectedVariants).forEach(([type, variantId]) => {
+      const variant = product.variants?.find((v) => v.id === variantId);
+      if (variant) {
+        variantSelections[type] = {
+          variantId: variant.id,
+          name: variant.name,
+          priceModifier: variant.priceModifier,
+        };
+      }
+    });
+
     addItem({
       id: product.id,
       name: product.name,
-      price: product.price,
+      price: effectivePrice,
       quantity: quantity,
       image: images[0],
+      variantSelections: Object.keys(variantSelections).length > 0 ? variantSelections : undefined,
+      customText: customText || undefined,
+      customImage: customImage || undefined,
     });
 
     alert(`${quantity} ${product.name} added to cart!`);
@@ -190,11 +232,44 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                   </div>
                   <span className="text-sm text-gray-600">(24 reviews)</span>
                 </div>
-                <p className="text-3xl font-bold text-primary-600">{formatPrice(product.price)}</p>
+                <p className="text-3xl font-bold text-primary-600">
+                  {variantModifier !== 0 ? (
+                    <>
+                      {formatPrice(effectivePrice)}
+                      <span className="text-sm text-gray-400 line-through ml-2">{formatPrice(product.price)}</span>
+                    </>
+                  ) : (
+                    formatPrice(product.price)
+                  )}
+                </p>
               </div>
 
               <div className="border-t border-gray-200 pt-6">
                 <p className="text-lg text-gray-700">{product.description}</p>
+              </div>
+
+              {/* Variant Selector */}
+              {product.variants && product.variants.length > 0 && (
+                <div className="border-t border-gray-200 pt-6">
+                  <VariantSelector
+                    variants={product.variants}
+                    selected={selectedVariants}
+                    onSelect={(type, variantId) =>
+                      setSelectedVariants((prev) => ({ ...prev, [type]: variantId }))
+                    }
+                    basePrice={product.price}
+                  />
+                </div>
+              )}
+
+              {/* Cake Customizer */}
+              <div className="border-t border-gray-200 pt-6">
+                <CakeCustomizer
+                  customText={customText}
+                  customImage={customImage}
+                  onCustomTextChange={setCustomText}
+                  onCustomImageChange={setCustomImage}
+                />
               </div>
 
               {/* Product Details */}
@@ -258,7 +333,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                     </button>
                   </div>
                   <div className="text-sm text-gray-600">
-                    <p className="font-semibold">Subtotal: {formatPrice(product.price * quantity)}</p>
+                    <p className="font-semibold">Subtotal: {formatPrice(effectivePrice * quantity)}</p>
                   </div>
                 </div>
               </div>

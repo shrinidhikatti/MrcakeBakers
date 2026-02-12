@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const products = await prisma.product.findMany({
       include: {
         category: true,
+        variants: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
       ingredients,
       allergens,
       featured,
+      variants,
     } = body;
 
     // Validate required fields
@@ -87,9 +89,17 @@ export async function POST(request: NextRequest) {
         ingredients: ingredients || null,
         allergens: allergens || null,
         featured: featured || false,
+        variants: variants && variants.length > 0 ? {
+          create: variants.map((v: any) => ({
+            type: v.type,
+            name: v.name,
+            priceModifier: parseFloat(v.priceModifier || '0'),
+          })),
+        } : undefined,
       },
       include: {
         category: true,
+        variants: true,
       },
     });
 

@@ -18,6 +18,7 @@ interface Product {
   category: {
     name: string;
   };
+  variants?: { id: string; type: string; name: string; priceModifier: number }[];
 }
 
 export default function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
@@ -82,6 +83,9 @@ export default function ProductCard({ product, priority }: { product: Product; p
         </div>
         <div className="flex items-center justify-between pt-4 mt-auto">
           <span className="text-2xl font-bold text-primary-600">
+            {product.variants && product.variants.length > 0 && (
+              <span className="text-sm font-medium text-gray-500 mr-1">From</span>
+            )}
             {formatPrice(product.price)}
           </span>
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">

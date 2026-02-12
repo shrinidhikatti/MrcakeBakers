@@ -12,12 +12,18 @@ import {
   Store,
   LogOut,
   X,
+  BarChart3,
+  Ticket,
+  Award,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/coupons", label: "Coupons", icon: Ticket },
+  { href: "/admin/loyalty", label: "Loyalty", icon: Award },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
