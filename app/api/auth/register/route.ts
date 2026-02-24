@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+function generateReferralCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "CAKE-";
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 export async function POST(request: Request) {
   try {
-    const { name, email, password, phone, birthday, specialDays } = await request.json();
+    const { name, email, password, phone, birthday, specialDays, referralCode: usedReferralCode } = await request.json();
 
     // Validate input
     if (!name || !email || !password) {
@@ -29,6 +38,25 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Resolve referrer
+    let referrerId: string | null = null;
+    if (usedReferralCode) {
+      const referrer = await prisma.user.findUnique({
+        where: { referralCode: usedReferralCode.toUpperCase() },
+      });
+      if (referrer) referrerId = referrer.id;
+    }
+
+    // Generate unique referral code
+    let newReferralCode = generateReferralCode();
+    let attempts = 0;
+    while (attempts < 5) {
+      const existing = await prisma.user.findUnique({ where: { referralCode: newReferralCode } });
+      if (!existing) break;
+      newReferralCode = generateReferralCode();
+      attempts++;
+    }
+
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -38,6 +66,8 @@ export async function POST(request: Request) {
         phone: phone || null,
         birthday: birthday ? birthday.slice(5) : null, // extract MM-DD from YYYY-MM-DD
         role: "CUSTOMER",
+        referralCode: newReferralCode,
+        referredBy: referrerId,
       },
     });
 

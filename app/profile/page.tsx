@@ -2,8 +2,9 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { User, Package, MapPin, Award } from "lucide-react";
+import { User, Package, MapPin, Award, Gift } from "lucide-react";
 import ProfileEditor from "@/components/ProfileEditor";
+import ReferralSection from "@/components/ReferralSection";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -116,6 +117,10 @@ export default async function ProfilePage() {
                 </div>
 
                 <ProfileEditor />
+
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <ReferralSection />
+                </div>
               </div>
             </div>
           </div>

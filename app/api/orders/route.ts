@@ -36,6 +36,9 @@ export async function POST(request: Request) {
       couponCode,
       discountAmount,
       pointsToRedeem,
+      referralCode,
+      referralDiscount,
+      referrerId,
     } = body;
 
     // Validate required fields
@@ -208,6 +211,44 @@ export async function POST(request: Request) {
           },
         });
       }
+    }
+
+    // Award referral bonus to referrer (100 points)
+    if (referrerId) {
+      const referrerAccount = await prisma.loyaltyAccount.findUnique({
+        where: { userId: referrerId },
+      });
+
+      if (referrerAccount) {
+        const newPoints = referrerAccount.points + 100;
+        const newTier =
+          newPoints >= 5000 ? "PLATINUM" :
+          newPoints >= 2000 ? "GOLD" :
+          newPoints >= 500 ? "SILVER" : "BRONZE";
+
+        await prisma.loyaltyAccount.update({
+          where: { userId: referrerId },
+          data: { points: { increment: 100 }, tier: newTier },
+        });
+      } else {
+        await prisma.loyaltyAccount.create({
+          data: {
+            userId: referrerId,
+            points: 100,
+            tier: "BRONZE",
+          },
+        });
+      }
+
+      await prisma.pointsTransaction.create({
+        data: {
+          userId: referrerId,
+          points: 100,
+          type: "REFERRAL_BONUS",
+          orderId: order.id,
+          description: `Referral bonus for order ${orderNumber}`,
+        },
+      });
     }
 
     return NextResponse.json(

@@ -11,6 +11,7 @@ import { formatPrice, generateOrderNumber } from "@/lib/utils";
 import { Calendar, Clock, MapPin, Loader2, Award } from "lucide-react";
 import CouponInput from "@/components/CouponInput";
 import PointsRedemption from "@/components/PointsRedemption";
+import ReferralInput from "@/components/ReferralInput";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -35,11 +36,14 @@ export default function CheckoutPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [pointsDiscount, setPointsDiscount] = useState(0);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [referralDiscount, setReferralDiscount] = useState(0);
+  const [referrerId, setReferrerId] = useState<string | null>(null);
 
   const subtotal = getTotal();
   const deliveryFee = subtotal > 500 ? 0 : 50;
-  const tax = Math.round((subtotal - couponDiscount) * 0.05);
-  const total = subtotal + deliveryFee + tax - couponDiscount - pointsDiscount;
+  const tax = Math.round((subtotal - couponDiscount - referralDiscount) * 0.05);
+  const total = subtotal + deliveryFee + tax - couponDiscount - pointsDiscount - referralDiscount;
 
   const getLocation = () => {
     setLocationMethod("gps");
@@ -102,6 +106,9 @@ export default function CheckoutPage() {
         couponCode: couponCode || null,
         discountAmount: couponDiscount,
         pointsToRedeem: pointsToRedeem || 0,
+        referralCode: referralCode || null,
+        referralDiscount: referralDiscount || 0,
+        referrerId: referrerId || null,
       };
 
       const response = await fetch("/api/orders", {
@@ -443,6 +450,27 @@ export default function CheckoutPage() {
                     />
                   </div>
 
+                  {/* Referral Code */}
+                  {session?.user && (
+                    <div className="border-t border-gray-200 pt-4">
+                      <ReferralInput
+                        subtotal={subtotal}
+                        onApply={(code, discount, rId) => {
+                          setReferralCode(code);
+                          setReferralDiscount(discount);
+                          setReferrerId(rId);
+                        }}
+                        onRemove={() => {
+                          setReferralCode(null);
+                          setReferralDiscount(0);
+                          setReferrerId(null);
+                        }}
+                        appliedCode={referralCode}
+                        discount={referralDiscount}
+                      />
+                    </div>
+                  )}
+
                   {/* Points Redemption */}
                   {session?.user && (
                     <div className="border-t border-gray-200 pt-4">
@@ -476,21 +504,12 @@ export default function CheckoutPage() {
                       </div>
                     )}
 
-                    <div className="flex justify-between text-gray-600">
-                      <span>Delivery Fee</span>
-                      <span className="font-semibold">
-                        {deliveryFee === 0 ? (
-                          <span className="text-green-600">FREE</span>
-                        ) : (
-                          formatPrice(deliveryFee)
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between text-gray-600">
-                      <span>Tax (5%)</span>
-                      <span className="font-semibold">{formatPrice(tax)}</span>
-                    </div>
+                    {referralDiscount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Referral Discount (10%)</span>
+                        <span className="font-semibold">-{formatPrice(referralDiscount)}</span>
+                      </div>
+                    )}
 
                     <div className="border-t border-gray-200 pt-3 flex justify-between text-xl font-bold text-bakery-chocolate">
                       <span>Total</span>
